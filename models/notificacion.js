@@ -3,25 +3,32 @@ const { Schema, model } = require('mongoose');
 const NotificacionSchema = Schema({
     idmedico: {
         type: Number,
-        required: [true, 'El nombre es obligatorio'],
-        unique: true
+        required: [true, 'El idmedico es obligatorio'],        
     },
     idpaciente: {
-        type: String,
-        required: [true, 'La contraseña es obligatoria'],
+        type: Number,
+        required: [true, 'El idpaciente es obligatorio'],
+    },
+    idcita: {
+        type: Number,
+        required: [true, 'La idcita es obligatoria'],
     },
     fecha:{
         type: Date,
         required: [true,'La fecha es requerida'],
-    },/* 
+    }, 
     hora:{
-        type: 
+        type: String,
         required: [true,'La hora es requerida'],
-    }, */
-    leido: {
+    },
+    estado: {
+        type: String,
+        required: [true,'El estado es requerido'],
+    },
+    leido:{
         type: Boolean,
         default: false
-    },
+    }
 });
 
 

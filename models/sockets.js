@@ -1,5 +1,6 @@
 const Notificaciones = require("./notificacion");
 
+
 class Sockets {
 
     constructor(io) {
@@ -17,19 +18,38 @@ class Sockets {
                 console.log('cliente desconectado');
             });
 
-            socket.on('notification_user', (data) => {                
+            socket.on('notification_user', async(data) => {                
                 console.log(data);
                 
-                /* let notification = {
+                let notification = {
                     'fecha': data.fecha,
                     'hora': data.hora,
                     'idmedico': data.idmedico,
                     'idpaciente': data.idpaciente,
                     'estado': data.estado,
-                    'id': data.id
+                    'idcita': data.id            
                 };                
 
-                io.emit('notification_processed_user', notification); */
+                // Almacenar en la BD
+                const cita = await Notificaciones.findOne({idcita: data.id});
+                if(!cita){                    
+                    const notificacion = new Notificaciones(notification);
+                    await notificacion.save();
+                }
+                const query = {leido:false,idmedico: data.idmedico};
+                const notificationes = await Notificaciones.find(query);
+
+                this.io.emit('notification_processed_user', notificationes);
+            });
+
+            socket.on('notification_read', async(data) => {
+                const query={idcita: data.id};
+                const notificacion = await Notificaciones.findOne(query);
+                notificacion.leido = true;
+                await notificacion.save();
+                const query2 = {leido:false,idmedico: data.idmedico};
+                const notificationes = await Notificaciones.find(query2);
+                this.io.emit('notification_processed_user', notificationes);
             });
         });
     }

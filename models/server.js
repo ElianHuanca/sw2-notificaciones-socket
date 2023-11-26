@@ -4,6 +4,7 @@ const cors = require('cors');
 const { dbConnection } = require('../database/config');
 const path = require('path');
 const http = require('http');
+
 const socketio = require('socket.io');
 const Sockets = require('./sockets');
 
@@ -12,16 +13,15 @@ class Server {
     constructor() {
         this.app  = express();
         this.port = process.env.PORT;
-        /* this.paths = {
-            auth:       '/api/auth',
-            usuarios:   '/api/usuarios',
-        } */
+        this.paths = {            
+            notifcaciones: '/api/notificaciones',
+        }
 
         // Conectar a base de datos
         this.conectarDB();
 
         this.server = http.createServer( this.app );
-        this.io = socketio( this.server, { /* configuraciones */ } );
+        this.io = socketio( this.server, { cors: { origin: "*" } } );
 
         // Middlewares
         //this.middlewares();
@@ -48,13 +48,13 @@ class Server {
         this.app.use( express.json() );
 
         // Directorio Público
-        this.app.use( express.static('public') );
+        //this.app.use( express.static('public') );
+        this.app.use( express.static( path.resolve( __dirname, '../public' ) ) );
 
     }
 
     routes() {
-        this.app.use( this.paths.usuarios, require('../routes/usuarios'));
-        this.app.use( this.paths.auth, require('../routes/auth'));
+        this.app.use( this.paths.notifcaciones, require('../routes/notificaciones'));        
     }
 
     /* listen() {
@@ -68,7 +68,7 @@ class Server {
         this.middlewares();
 
         // Rutas de mi aplicación
-        //this.routes();
+        this.routes();
 
         // Inicializar sockets
         this.configurarSockets();
