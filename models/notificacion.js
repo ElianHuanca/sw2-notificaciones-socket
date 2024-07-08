@@ -1,7 +1,7 @@
 const { Schema, model } = require('mongoose');
 
 const NotificacionSchema = Schema({
-    idmedico: {
+    /* idmedico: {
         type: Number,
         required: [true, 'El idmedico es obligatorio'],        
     },
@@ -24,11 +24,23 @@ const NotificacionSchema = Schema({
     estado: {
         type: String,
         required: [true,'El estado es requerido'],
+    }, */
+    idtela:{
+        type:Number,
+        required: [true,'El idtela es requerido'],
     },
-    leido:{
-        type: Boolean,
-        default: false
-    }
+    nombre:{
+        type: String,
+        required: [true,'El nombre es requerido'],
+    },
+    rop : {
+        type: String,
+        required: [true,'El rop es requerido'],
+    },
+    stock : {
+        type: String,
+        required: [true,'El stock es requerido'],
+    },    
 });
 
 

@@ -19,39 +19,48 @@ class Sockets {
             });
 
             socket.on('notification_user', async(data) => {                
-                console.log(data);
                 
-                let notification = {
-                    'fecha': data.fecha,
-                    'hora': data.hora,
-                    'idmedico': data.idmedico,
-                    'idpaciente': data.idpaciente,
-                    'estado': data.estado,
-                    'idcita': data.id            
-                };                
-
-                // Almacenar en la BD
-                const cita = await Notificaciones.findOne({idcita: data.id});
-                if(!cita){                    
-                    const notificacion = new Notificaciones(notification);
-                    await notificacion.save();
+                for (const item of data) {
+                    let notification = {                    
+                        'idtela': item.idtela,
+                        'nombre': item.nombre,
+                        'rop': item.rop,
+                        'stock': item.stock,
+                    };
+            
+                    // Almacenar en la BD
+                    const tela = await Notificaciones.findOne({ idtela: item.idtela });
+                    if (!tela) {
+                        const notificacion = new Notificaciones(notification);
+                        await notificacion.save();
+                    }else{
+                        await Notificaciones.updateOne({ idtela: item.idtela }, { $set: { stock: item.stock } });                    
+                    }
                 }
-                const query = {leido:false,idmedico: data.idmedico};
-                const notificationes = await Notificaciones.find(query);
+                //const query = {idmedico: data.idmedico};
+                const notificaciones = await Notificaciones.find();
 
-                this.io.emit('notification_processed_user', notificationes);
+                this.io.emit('notification_processed_user', notificaciones);
             });
 
             socket.on('notification_read', async(data) => {
-                const query={idcita: data.id};
-                const notificacion = await Notificaciones.findOne(query);
-                notificacion.leido = true;
-                await notificacion.save();
-                const query2 = {leido:false,idmedico: data.idmedico};
-                const notificationes = await Notificaciones.find(query2);
-                this.io.emit('notification_processed_user', notificationes);
+                try {
+                    const query = { idtela: data.idtela };
+                    
+                    // Eliminar la notificación específica
+                    await Notificaciones.deleteOne(query);
+                    
+                    // Obtener las notificaciones restantes
+                    const notificaciones = await Notificaciones.find();
+                    
+                    // Emitir las notificaciones actualizadas
+                    this.io.emit('notification_processed_user', notificaciones);
+                } catch (error) {
+                    console.error('Error processing notification:', error);
+                }                
             });
         });
     }
 }
 module.exports = Sockets;
+
